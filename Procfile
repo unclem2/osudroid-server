@@ -1,1 +1,1 @@
-web: python main.py
+web: hypercorn main.py
