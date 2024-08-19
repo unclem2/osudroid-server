@@ -1,3 +1,4 @@
+import os
 import logging
 import asyncio
 import coloredlogs
@@ -85,10 +86,10 @@ async def index():
   return {
     'players': len(glob.players),
     'online': len([_ for _ in glob.players if _.online]),
-    'title': 'when the impostor is sus'
+    'title': 'hello world'
   }
 
 if __name__ == '__main__':
   coloredlogs.install(level=logging.INFO)
-  app.run(port=glob.config.port, use_reloader=False, host=glob.config.host, debug=False)
+  app.run(port=glob.config.port, use_reloader=False, host=os.environ.get("SERVER_HOST", "0.0.0.0"), debug=False)
 
