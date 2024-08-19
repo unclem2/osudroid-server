@@ -1,4 +1,4 @@
-
+import os
 ## MAIN ##
 server_name = 'atmosphere'       # yes
 port = 80                    # server port
@@ -14,7 +14,7 @@ cron_delay = 15  # used for updating user stats, if your server is big, you migh
 pp = False
 pp_leaderboard = False # Shows pp instead of score and sort by pp
 # used for beatmap info, unused if pp is disabled
-
+osu_key = os.getenv('OSU_KEY', '')
 #- MAINTENACE -#
 disable_submit = False # Does what it says and shows a message to user when trying to play submit a play.
 
