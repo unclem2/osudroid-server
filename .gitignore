@@ -136,3 +136,4 @@ dmypy.json
 .pyre/
 data/avatar/6.png
 data/avatar/1.png
+tets.py
