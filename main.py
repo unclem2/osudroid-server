@@ -90,6 +90,6 @@ async def index():
   }
 
 if __name__ == '__main__':
-  coloredlogs.install(level=logging.DEBUG)
+  coloredlogs.install(level=logging.INFO)
   app.run(port=os.environ.get("PORT", 80), use_reloader=False, host=os.environ.get("SERVER_HOST", "0.0.0.0"), debug=False)
 
