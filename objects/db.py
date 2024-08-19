@@ -18,7 +18,28 @@ class sqliteDB:
 
     async def checkDatabase(self):
         query = '''
-                CREATE TABLE IF NOT EXISTS "maps" ( "hash" TEXT, "data" TEXT, PRIMARY KEY("hash") );
+        
+                CREATE TABLE IF NOT EXISTS "maps" (
+                  "id" INTEGER,
+                    "set_id" INTEGER,
+                    "artist" TEXT,
+                    "title" TEXT,
+                    "version" TEXT,
+                    "creator" TEXT,
+                    "last_update" INTEGER,
+                    "total_length" INTEGER,
+                    "max_combo" INTEGER,
+                    "status" INTEGER,
+                    "mode" INTEGER,
+                    "bpm" REAL,
+                    "cs" REAL,
+                    "od" REAL,
+                    "ar" REAL,
+                    "hp" REAL,
+                    "star" REAL,
+                    "md5" TEXT,
+                    PRIMARY KEY("id")
+                );
 
                 CREATE TABLE IF NOT EXISTS "scores" (
                   "id" INTEGER,
