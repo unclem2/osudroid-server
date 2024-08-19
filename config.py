@@ -11,7 +11,7 @@ cron_delay = 15  # used for updating user stats, if your server is big, you migh
 ## RANKING ##
 #- GLOBAL -#
 # enable to use pp system
-pp = False
+pp = True
 pp_leaderboard = False # Shows pp instead of score and sort by pp
 # used for beatmap info, unused if pp is disabled
 osu_key = os.getenv('OSU_KEY', '')
