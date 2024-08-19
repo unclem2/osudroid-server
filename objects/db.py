@@ -107,7 +107,7 @@ class sqliteDB:
     async def fetch(self, query: str, params: list = [], _all: bool = False):
         async with self.db.execute(query, params) as cursor:
 
-            if all:
+            if _all:
                 res = await cursor.fetchall()
             else:
                 res = await cursor.fetchone()
