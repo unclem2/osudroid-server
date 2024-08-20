@@ -32,7 +32,7 @@ async def login():
     return Failed("User not found.")
 
   ## login shites
-  res = (await glob.db.fetch("SELECT password_hash, status FROM users WHERE id = ?", [p.id]))[0]
+  res = (await glob.db.fetch("SELECT password_hash, status FROM users WHERE id = $1", [p.id])) 
   status = res['status']
   pswd_hash = res['password_hash']
   hashes = glob.cache['hashes']
@@ -85,23 +85,31 @@ async def register():
   if len(params['username']) < 2:
     return Failed("Username must be longer than 2 characters.")
 
-  player_id = await glob.db.execute('INSERT INTO users VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-  [
-    None,
-    params['username'],
-    utils.make_safe(params['username']),
-    ph.hash(params['password']),
-    params['deviceID'],
-    'NotUsed',
-    None,
-    None,
-    params['email'],
-    utils.make_md5(params['email']),
-    0
-  ])
+  player_id = await glob.db.execute(
+        '''
+    INSERT INTO users (
+        prefix, username, username_safe, password_hash, device_id, sign, avatar_id, custom_avatar, email, email_hash, status
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id
+    ''',
+    [
+        None,
+        params['username'],
+        utils.make_safe(params['username']),
+        ph.hash(params['password']),
+        params['deviceID'],
+        'NotUsed',
+        None,
+        None,
+        params['email'],
+        utils.make_md5(params['email']),
+        0
+    ]
+)
   # also create stats table
-  await glob.db.execute('INSERT INTO stats (id) VALUES (?)', [player_id])
-
+  await glob.db.execute(
+      'INSERT INTO stats (id) VALUES ($1)',
+      [int(player_id)]
+  )
   # create player
   p = await Player.from_sql(player_id)
   glob.players.add(p)
@@ -118,9 +126,14 @@ async def leaderboard():
     return Failed('No map hash.')
 
   res = []
-  plays = await glob.db.fetchall("SELECT * FROM scores where mapHash = ? and status = 2 ORDER BY {order_by} DESC".format(order_by='pp' if glob.config.pp_leaderboard else 'score'), [params['hash']])
+  plays = await glob.db.fetchall(
+    "SELECT * FROM scores WHERE maphash = $1 AND status = 2 ORDER BY {order_by} DESC".format(
+        order_by='pp' if glob.config.pp_leaderboard else 'score'
+    ),
+    [params['hash']]
+  )
   for play in plays:
-    player = glob.players.get(id=int(play['playerID']))
+    player = glob.players.get(id=int(play['playerid']))
 
     res += ['{play_id} {name} {score} {combo} {rank} {mods} {acc} {gravatar_hash}'.format(
       play_id = play['id'],
@@ -140,9 +153,9 @@ async def leaderboard():
 async def view_score():
   params = await request.form
 
-  play = await glob.db.fetch("SELECT * FROM scores WHERE id = ?", [params['playID']])
+  play = await glob.db.fetch("SELECT * FROM scores WHERE id = $1", [int(params['playID'])])
   if play:
-    play = play[0]
+    
     return Success('{mods} {score} {combo} {rank} {hitgeki} {hit300} {hitkatsu} {hit100} {hitmiss} {hit50} {acc}'.format(
       mods = play['mods'],
       score = int(play['pp']) if glob.config.pp_leaderboard else play['score'],
@@ -227,8 +240,7 @@ async def submit_play():
 
     if s.status == SubmissionStatus.BEST:
       # if this score is better change old play status to 1
-      await glob.db.execute('UPDATE scores SET status = 1 WHERE status = 2 AND mapHash = ? AND playerID = ?', [s.map_hash, s.player.id])
-
+      await glob.db.execute('UPDATE scores SET status = 1 WHERE status = 2 AND mapHash = $1 AND playerID = $2', [s.map_hash, s.player.id])
     if s.map_hash == None:
       return Failed('Server cannot find your recent play, maybe it restarted?')
     elif not s.player:
@@ -242,9 +254,10 @@ async def submit_play():
       return Success(s.player.stats.droid_submit_stats)
 
     vals = [s.status, s.map_hash, s.player.id, s.score, s.max_combo, s.grade, s.acc, s.h300, s.hgeki, s.h100, s.hkatsu, s.h50, s.hmiss, s.mods, s.pp]
-    s.id = await glob.db.execute('INSERT INTO scores VALUES (NULL, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', vals)
-
-    ### The pain part
+    s.id = await glob.db.execute('''
+        INSERT INTO scores (status, mapHash, playerID, score, combo, rank, acc, hit300, hitgeki, hit100, hitkatsu, hit50, hitmiss, mods, pp)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+    ''', vals)
     upload_replay = False
     if s.status == SubmissionStatus.BEST:
       upload_replay = True
@@ -265,7 +278,7 @@ async def submit_play():
 
     ## Update Ranked Score stats to db
     await glob.db.execute(
-      'UPDATE stats SET rscore = ?, tscore = ?, plays = ? WHERE id = ?',
+      'UPDATE stats SET rscore = $1, tscore = $2, plays = $3 WHERE id = $4',
       [stats.rscore, stats.tscore, stats.plays, s.player.id])
 
     ## Update stats one more time - i know this is retarded cuz we're already doing it above but im basing it from the old code so

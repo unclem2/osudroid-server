@@ -82,14 +82,13 @@ class Player:
 
   @classmethod
   async def from_sql(cls, user_id: int):
-    user_data = await glob.db.fetch("SELECT id, prefix, username, email_hash, email FROM users WHERE id = ?", [user_id])
-    user_stats = await glob.db.fetch("SELECT * FROM stats WHERE id = ?", [user_id])
-
+    user_data = await glob.db.fetch("SELECT id, prefix, username, email_hash, email FROM users WHERE id = $1", [int(user_id)])
+    user_stats = await glob.db.fetch("SELECT * FROM stats WHERE id = $1", [int(user_id)])
     if not user_data or not user_stats:
       raise Exception('Failed to get user from database.')
 
-    user_data = user_data[0]
-    user_stats = user_stats[0]
+    # user_data = user_data[0]
+    # user_stats = user_stats[0]
 
     # fix email_hash if its none and user got email (there should be)
     if user_data['email_hash'] == None and user_data['email'] != None:
@@ -106,10 +105,10 @@ class Player:
 
   async def update_stats(self):
     res = await glob.db.fetchall(
-      'SELECT s.acc, s.pp FROM scores s '
-      'WHERE s.playerID = ? and s.status = 2 '
-      'ORDER BY s.score DESC LIMIT 100'
-      , [self.id]
+        'SELECT s.acc, s.pp FROM scores s '
+        'WHERE s.playerID = $1 and s.status = 2 '
+        'ORDER BY s.score DESC LIMIT 100',
+        [int(self.id)]
     )
 
     if not res:
@@ -129,16 +128,15 @@ class Player:
     higher_by = stats.pp if glob.config.pp else stats.rscore
     res = await glob.db.fetch(
       'SELECT count(*) AS c FROM stats '
-      'WHERE {} > ?'.format(rank_by)
-      , [higher_by]
+      'WHERE {} > $1'.format(rank_by),
+      [higher_by]
     )
 
 
-    stats.rank = res[0]['c'] + 1
+    stats.rank = res['c'] + 1
 
     # update into db
-    await glob.db.execute('UPDATE stats SET acc = ?, rank = ?, pp = ? WHERE id = ?', [stats.acc, stats.rank, stats.pp, self.id])
-
+    await glob.db.execute('UPDATE stats SET acc = $1, rank = $2, pp = $3 WHERE id = $4', [stats.acc, stats.rank, stats.pp, self.id])
 
 
 

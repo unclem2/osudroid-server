@@ -84,9 +84,11 @@ class Beatmap:
 
     if md5 in glob.cache['unsubmitted']:
       return
-
-    # from sql
-    if not (bmap := await cls.from_md5_sql(md5)):
+    try:
+      bmap = await cls.from_md5_sql(md5)
+    except:
+      bmap = None
+    if bmap is None:
       # Not found in md5, try get from osu!api
 
       # check api key beforehand
@@ -107,16 +109,16 @@ class Beatmap:
   @classmethod
   async def from_md5_sql(cls, md5: str):
     if res := await glob.db.fetch(
-      'SELECT id, set_id, '
-      'artist, title, version, creator, '
-      'last_update, total_length, max_combo, '
-      'status, '
-      'mode, bpm, cs, od, ar, hp, '
-      'star '
-      'FROM maps WHERE md5 = ?',
-      [md5]
+        'SELECT id, set_id, '
+        'artist, title, version, creator, '
+        'last_update, total_length, max_combo, '
+        'status, '
+        'mode, bpm, cs, od, ar, hp, '
+        'star '
+        'FROM maps WHERE md5 = $1',
+        [md5]
     ):
-      return cls(**res[0])
+        return cls(**res)
 
   @classmethod
   async def from_md5_osuapi(cls, md5: str):
@@ -159,26 +161,47 @@ class Beatmap:
 
 
   async def save_to_sql(self):
+    
+
+# Convert datetime objects to Unix timestamp integers
+    last_update_int = int(self.last_update.timestamp()) if isinstance(self.last_update, datetime) else self.last_update
     await glob.db.execute(
-      'REPLACE INTO maps ('
+        'INSERT INTO maps ('
         'md5, id, set_id, '
         'artist, title, version, creator, '
         'last_update, total_length, max_combo, '
         'status, '
         'mode, bpm, cs, od, ar, hp, star'
-      ') VALUES ('
-        '?, ?, ?, '
-        '?, ?, ?, ?,'
-        '?, ?, ?, '
-        '?, '
-        '?, ?, ?, ?, ?, ?, ?)'
-      , [
-        self.md5, self.id, self.set_id,
-        self.artist, self.title, self.version, self.creator,
-        self.last_update, self.total_length, self.max_combo,
-        self.status,
-        self.mode, self.bpm, self.cs, self.od, self.ar, self.hp, self.star
-      ]
+        ') VALUES ('
+        '$1, $2, $3, '
+        '$4, $5, $6, $7, '
+        '$8, $9, $10, '
+        '$11, '
+        '$12, $13, $14, $15, $16, $17, $18'
+        ') ON CONFLICT (id) DO UPDATE SET '
+        'md5 = EXCLUDED.md5, '
+        'set_id = EXCLUDED.set_id, '
+        'artist = EXCLUDED.artist, '
+        'title = EXCLUDED.title, '
+        'version = EXCLUDED.version, '
+        'creator = EXCLUDED.creator, '
+        'last_update = EXCLUDED.last_update, '
+        'total_length = EXCLUDED.total_length, '
+        'max_combo = EXCLUDED.max_combo, '
+        'status = EXCLUDED.status, '
+        'mode = EXCLUDED.mode, '
+        'bpm = EXCLUDED.bpm, '
+        'cs = EXCLUDED.cs, '
+        'od = EXCLUDED.od, '
+        'ar = EXCLUDED.ar, '
+        'hp = EXCLUDED.hp, '
+        'star = EXCLUDED.star',
+        [
+            self.md5, self.id, self.set_id,
+            self.artist, self.title, self.version, self.creator,
+            last_update_int, self.total_length, self.max_combo,
+            self.status,
+            self.mode, self.bpm, self.cs, self.od, self.ar, self.hp, self.star
+        ]
     )
-
 

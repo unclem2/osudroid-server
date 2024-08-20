@@ -7,7 +7,7 @@ from quart import Quart
 # sus
 from objects import glob
 from objects.player import Player
-from objects.db import sqliteDB
+from objects.db import PostgresDB
 
 # handlers
 from handlers import (cho, api)
@@ -22,7 +22,7 @@ from objects.beatmap import Beatmap
 
 def make_app():
   app = Quart(__name__)
-  glob.db = sqliteDB()
+  glob.db = PostgresDB()
 
   # routes shit idk
   routes = [cho, api]
@@ -51,7 +51,7 @@ async def init_shit():
 
 
   # init players
-  player_ids = await glob.db.fetchall("SELECT id FROM users where id != -1")
+  player_ids = await glob.db.fetchall("SELECT id FROM users WHERE id != -1")
   for id in player_ids:
     p = await Player.from_sql(id['id']) # maybe do this on login instead?, will prolly take alot of time to start if theres lot of players
     glob.players.add(p)
@@ -90,6 +90,6 @@ async def index():
   }
 
 if __name__ == '__main__':
-  coloredlogs.install(level=logging.INFO)
+  coloredlogs.install(level=logging.DEBUG)
   app.run(port=os.environ.get("PORT", 80), use_reloader=False, host=os.environ.get("SERVER_HOST", "0.0.0.0"), debug=False)
 

@@ -57,18 +57,17 @@ class Score:
     @classmethod
     async def from_sql(cls, score_id: int):
         #res = await glob.db.getPlay(score_id)
-        res = await glob.db.fetch("SELECT * FROM scores WHERE id = ?", [score_id])
-
+        res = await glob.db.fetch("SELECT * FROM scores WHERE id = $1", [score_id])
         if not res:
             return
 
         s = cls()
-        res = res[0]
+        
         s.id = res['id']
-        s.bmap = await Beatmap.from_md5(res['mapHash'])
-        s.player = glob.players.get(id=int(res['playerID']))
+        s.bmap = await Beatmap.from_md5(res['maphash'])
+        s.player = glob.players.get(id=int(res['playerid']))
         s.status = SubmissionStatus(res['status'])
-        s.map_hash = res['mapHash']
+        s.map_hash = res['maphash']
 
 
         s.score = res['score']
@@ -141,17 +140,17 @@ class Score:
 
 
     async def calc_lb_placement(self):
-        res = await glob.db.fetch("select count(*) as c from scores where mapHash = ? and score > ?", [self.map_hash, self.score])
-        return int(res[0]['c']) + 1 if res else 1
-
+        res = await glob.db.fetch("SELECT count(*) as c FROM scores WHERE mapHash = $1 AND score > $2", [self.map_hash, self.score])
+        return int(res['c']) + 1 if res else 1
 
 
     async def calc_status(self):
         #res = await glob.db.userScore(id=self.player.id, mapHash=self.mapHash)
-        res = await glob.db.fetch('SELECT * FROM scores WHERE playerID = ? AND mapHash = ?', [self.player.id, self.map_hash])
-
+        try:
+            res = await glob.db.fetch('SELECT * FROM scores WHERE playerID = $1 AND mapHash = $2', [self.player.id, self.map_hash])
+        except:
+            res = None
         if res:
-            res = res[0]
             self.prev_best = await Score.from_sql(res['id'])
 
             if self.score > res['score']:
