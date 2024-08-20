@@ -1,8 +1,11 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 ## MAIN ##
 server_name = 'atmosphere'       # yes
-port = 80                    # server port
-
+port = os.getenv('PORT')                   # server port
+host = os.getenv('SERVER_HOST')
 ## CRON ##
 # 1 = 1 Minute
 cron_delay = 15  # used for updating user stats, if your server is big, you might want to set it to 60 or higher to
@@ -15,6 +18,8 @@ pp = True
 pp_leaderboard = True # Shows pp instead of score and sort by pp
 # used for beatmap info, unused if pp is disabled
 osu_key = os.getenv('OSU_KEY', '')
+db_url = os.getenv('DATABASE_URL', '')
+
 #- MAINTENACE -#
 disable_submit = False # Does what it says and shows a message to user when trying to play submit a play.
 

@@ -2,7 +2,8 @@ import asyncio
 import asyncpg
 import os
 import logging
-
+from dotenv import load_dotenv
+load_dotenv()
 class PostgresDB:
     ''' based from cmyui's {pkg: mysql} but for PostgreSQL on Heroku
     '''
