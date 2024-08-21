@@ -120,20 +120,20 @@ async def recalc_scores():
     ''' never use this unless something fucked up/testing '''
     print('recalculatin sk0r3')
 
-    scores = await glob.db.fetchall('select * from scores where status = 2')
+    scores = await glob.db.fetchall('SELECT * FROM scores WHERE status = 2')
     for score in scores:
-        m = await PPCalculator.from_md5(score['mapHash'])
+        m = await PPCalculator.from_md5(score['maphash'])
         if m:
             m.acc = score['acc']
-            m.nmiss = score['hitmiss']
-            m.combo = score['combo']
-            m.mods = convert_droid(score['mods'])
+            m.hmiss = score['hitmiss']
+            m.max_combo = score['combo']
+            m.bmap = await Beatmap.from_md5(score['maphash'])
+            m.mods = score['mods']
+            pp = await m.calc(m)
 
-            pp = await m.calc()
+            print(score['maphash'], pp)
 
-            print(score['mapHash'], pp)
-
-            await glob.db.execute("UPDATE scores SET pp = ? where id = ?", [pp, score['id']])
+            await glob.db.execute("UPDATE scores SET pp = $1 WHERE id = $2", [pp, score['id']])
 
 
 

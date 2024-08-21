@@ -44,7 +44,7 @@ async def init_shit():
 
   # Testing stuff
   # recalc pp
-  # await pp.recalc_scores()
+  await pp.recalc_scores()
   # test bmap object
   # await Beatmap.from_md5('3ef4d1085a8bee29660a2908cbb1dec9')
 
