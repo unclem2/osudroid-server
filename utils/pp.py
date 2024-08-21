@@ -3,7 +3,7 @@ import logging
 import oppadc
 from pathlib import Path
 from enum import Enum, IntEnum, unique
-
+import subprocess
 from objects import glob
 from objects.beatmap import Beatmap
 
@@ -57,15 +57,18 @@ class osuMods(IntEnum):
 def convert_droid(mods: str):
     ''' fucked '''
     modstr = [m.value for m in droidMods]
-    val = 4 # hardcode TD to mods
+    val = 0
     for n, word in enumerate(mods):
         if word in modstr:
+            if word == 's':
+                continue
             val += osuMods[droidMods(word).name].value
 
     return val
 
-
-
+def get_used_mods(mods):
+    mods = mods.replace('|', '').replace('x', '')
+    return mods
 
 class PPCalculator:
     """
@@ -98,11 +101,19 @@ class PPCalculator:
 
 
 
-    async def calc(self):
-        curMap = oppadc.OsuMap(file_path=self.bm_path)
-        pp = curMap.getPP(self.mods, accuracy=self.acc, misses=self.nmiss, combo=self.combo)
-
-        return pp.total_pp
+    async def calc(self, s):
+        mods = get_used_mods(s.mods)
+        pp = subprocess.run(
+            [
+                'node', '--no-deprecation', 'main.mjs', 
+                str(s.bmap.id), mods, str(s.acc), str(s.hmiss), str(s.max_combo)
+            ],
+            capture_output=True,
+            text=True
+        ).stdout
+        pp = pp.replace('\n', '')
+        
+        return float(pp)  # Convert pp to float
 
 
 async def recalc_scores():

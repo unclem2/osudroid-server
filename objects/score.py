@@ -86,7 +86,7 @@ class Score:
 
         s.pp = await PPCalculator.from_md5(s.map_hash, mods=s.mods, combo=s.max_combo, nmiss=s.hmiss, acc=s.acc)
         if s.pp:
-            s.pp = await s.pp.calc()
+            s.pp = await s.pp.calc(s)
 
         if s.map_hash:
             s.rank = await s.calc_lb_placement()
@@ -127,9 +127,9 @@ class Score:
         s.device_id = data[11] # 1.6.8: Int?
 
         s.pp = await PPCalculator.from_md5(s.map_hash, mods=s.mods, combo=s.max_combo, nmiss=s.hmiss, acc=s.acc)
-
+        
         if s.bmap:
-            s.pp = await s.pp.calc()
+            s.pp = await s.pp.calc(s)
             await s.calc_status()
             s.rank = await s.calc_lb_placement()
         else:

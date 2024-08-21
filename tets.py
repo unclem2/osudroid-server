@@ -1,6 +1,6 @@
 import requests
 
-test = False
+test = True
 if test is True:
     endp = 'http://0.0.0.0:5001'
 if test is False:
@@ -44,7 +44,7 @@ def login():
 def padoru_presubmit(ssid):
     url = f'{endp}/api/submit.php'
     data = {
-        'userID': '3',
+        'userID': '2',
         'ssid': f'{ssid}',
         'filename': 'Turbo - PADORU  PADORU (Sotarks) [Gift].osu',
         'hash': 'a53a591e8ee0e4cf66a20a070968b194',
@@ -61,9 +61,9 @@ def padoru_presubmit(ssid):
 def padoru_submit():
     url = f'{endp}/api/submit.php'
     data = {
-        'userID': '3',
+        'userID': '2',
         'playID': '1',
-        'data' : '| 473932 179 B 16 124 4 21 0 2 89115 1724083548144 0 lnh'
+        'data' : 'xs| 4739302 179 B 16 124 4 21 0 2 89115 1724083548144 0 lnh'
         
     }
     response = requests.post(url, data=data)
@@ -128,7 +128,7 @@ def getrank():
         print('Response:', response.text)
     else:
         print('Failed', response.status_code)
-register()  
+# register()  
 ssid = login()
 padoru_presubmit(ssid)
 padoru_submit()
