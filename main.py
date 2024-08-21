@@ -89,6 +89,7 @@ async def index():
     'title': 'hello world'
   }
 
+
 if __name__ == '__main__':
   coloredlogs.install(level=logging.DEBUG)
   app.run(port=glob.config.port, use_reloader=False, host=glob.config.host, debug=False)
