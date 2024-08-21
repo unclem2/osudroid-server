@@ -1,6 +1,6 @@
 import requests
 
-test = True
+test = False
 if test is True:
     endp = 'http://0.0.0.0:5001'
 if test is False:
@@ -8,10 +8,10 @@ if test is False:
 def register():
     url = f'{endp}/api/register.php'
     data = {
-        'username': 'unclem3',
-        'password': 'd7df09cd5ed94d4ad815c3fa5aef46fc',
+        'username': 'lnh',
+        'password': '14120a3fc517841862049bb4066843fe',
         'deviceID': 'testdeviceid',
-        'email': 'mannrindsdgyt11@gmail.com',
+        'email': 'bwadoasdjd@afasf.com',
         'sign': 'testsign'
     }
 
@@ -24,8 +24,8 @@ def register():
 def login():
     url = f'{endp}/api/login.php'
     data = {
-        'username': 'unclem3',
-        'password': 'd7df09cd5ed94d4ad815c3fa5aef46fc',
+        'username': 'lnh',
+        'password': '14120a3fc517841862049bb4066843fe',
         'version': '40'
     }
 
@@ -44,7 +44,7 @@ def login():
 def padoru_presubmit(ssid):
     url = f'{endp}/api/submit.php'
     data = {
-        'userID': '1',
+        'userID': '3',
         'ssid': f'{ssid}',
         'filename': 'Turbo - PADORU  PADORU (Sotarks) [Gift].osu',
         'hash': 'a53a591e8ee0e4cf66a20a070968b194',
@@ -61,9 +61,9 @@ def padoru_presubmit(ssid):
 def padoru_submit():
     url = f'{endp}/api/submit.php'
     data = {
-        'userID': '1',
+        'userID': '3',
         'playID': '1',
-        'data' : '| 473932 179 B 16 124 4 21 0 2 89115 1724083548144 0 unclem3'
+        'data' : '| 473932 179 B 16 124 4 21 0 2 89115 1724083548144 0 lnh'
         
     }
     response = requests.post(url, data=data)
@@ -76,7 +76,7 @@ def presubmit_second(ssid):
     url = f'{endp}/api/submit.php'
 
     data = {
-    'userID': '1',
+    'userID': '2',
     'ssid': f'{ssid}',
     'filename': 'goreshit - looming shadow of a tree long gone (grumd) [Insane].osu',
     'hash': '4a7d699238f84bf0880f836c1fac1b11',
@@ -128,13 +128,13 @@ def getrank():
         print('Response:', response.text)
     else:
         print('Failed', response.status_code)
-# register()  
-# ssid = login()
-# padoru_presubmit(ssid)
-# padoru_submit()
+register()  
+ssid = login()
+padoru_presubmit(ssid)
+padoru_submit()
 # presubmit_second(ssid)
 # submit_second()
-for i in range(1, 6):
-    gettop(i)
-getrank()
+# for i in range(1, 6):
+#     gettop(i)
+# getrank()
 

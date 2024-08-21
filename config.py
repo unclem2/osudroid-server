@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 ## MAIN ##
 server_name = 'atmosphere'       # yes
 port = os.getenv('PORT')                   # server port
@@ -21,5 +21,5 @@ osu_key = os.getenv('OSU_KEY', '')
 db_url = os.getenv('DATABASE_URL', '')
 
 #- MAINTENACE -#
-disable_submit = False # Does what it says and shows a message to user when trying to play submit a play.
+disable_submit = True # Does what it says and shows a message to user when trying to play submit a play.
 
